@@ -1,0 +1,154 @@
+{
+  "trained_at": "2026-09-22 10:34",
+  "algorithm": "Voting(RandomForest + GradientBoosting, soft)",
+  "dataset_records": 6607,
+  "train_records_after_smote": 21000,
+  "classes": [
+    "Distinction",
+    "Upper Credit",
+    "Lower Credit",
+    "Pass",
+    "Fail"
+  ],
+  "cgpa_bands": {
+    "Distinction": "CGPA 3.50 \u2013 4.00",
+    "Upper Credit": "CGPA 3.00 \u2013 3.49",
+    "Lower Credit": "CGPA 2.50 \u2013 2.99",
+    "Pass": "CGPA 2.00 \u2013 2.49",
+    "Fail": "CGPA below 2.00"
+  },
+  "grading_authority": "NBTE 4.0 scale (Yaba College of Technology)",
+  "class_distribution": {
+    "Distinction": 966,
+    "Upper Credit": 1786,
+    "Lower Credit": 2116,
+    "Pass": 1241,
+    "Fail": 498
+  },
+  "metrics": {
+    "accuracy": 0.7844,
+    "precision": 0.7862,
+    "recall": 0.7844,
+    "f1": 0.7844
+  },
+  "per_class": {
+    "Distinction": {
+      "precision": 0.874,
+      "recall": 0.829,
+      "f1-score": 0.851,
+      "support": 193.0
+    },
+    "Upper Credit": {
+      "precision": 0.787,
+      "recall": 0.798,
+      "f1-score": 0.793,
+      "support": 357.0
+    },
+    "Lower Credit": {
+      "precision": 0.767,
+      "recall": 0.809,
+      "f1-score": 0.788,
+      "support": 424.0
+    },
+    "Pass": {
+      "precision": 0.727,
+      "recall": 0.73,
+      "f1-score": 0.728,
+      "support": 248.0
+    },
+    "Fail": {
+      "precision": 0.84,
+      "recall": 0.68,
+      "f1-score": 0.751,
+      "support": 100.0
+    }
+  },
+  "confusion_matrix": [
+    [
+      160,
+      33,
+      0,
+      0,
+      0
+    ],
+    [
+      22,
+      285,
+      50,
+      0,
+      0
+    ],
+    [
+      1,
+      44,
+      343,
+      36,
+      0
+    ],
+    [
+      0,
+      0,
+      54,
+      181,
+      13
+    ],
+    [
+      0,
+      0,
+      0,
+      32,
+      68
+    ]
+  ],
+  "feature_importances": [
+    {
+      "feature": "Hours_Studied",
+      "importance": 0.2732
+    },
+    {
+      "feature": "Previous_Scores",
+      "importance": 0.1783
+    },
+    {
+      "feature": "Attendance",
+      "importance": 0.1503
+    },
+    {
+      "feature": "Tutoring_Sessions",
+      "importance": 0.0428
+    },
+    {
+      "feature": "Sleep_Hours",
+      "importance": 0.0346
+    },
+    {
+      "feature": "Access_to_Resources",
+      "importance": 0.0321
+    },
+    {
+      "feature": "Motivation_Level",
+      "importance": 0.0302
+    },
+    {
+      "feature": "Physical_Activity",
+      "importance": 0.03
+    },
+    {
+      "feature": "Peer_Influence",
+      "importance": 0.0293
+    },
+    {
+      "feature": "Parental_Involvement",
+      "importance": 0.0281
+    },
+    {
+      "feature": "Teacher_Quality",
+      "importance": 0.0235
+    },
+    {
+      "feature": "Family_Income",
+      "importance": 0.0234
+    }
+  ],
+  "train_seconds": 179.3
+}

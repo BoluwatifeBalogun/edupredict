@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Prediction result · YCT{% endblock %}
+{% block content %}
+{% set palette = {
+  'Distinction':  ('#9A7B14', '#F6EFD7'),
+  'Upper Credit': ('#1E4D38', '#E4EEE6'),
+  'Lower Credit': ('#5F8570', '#E9F0EA'),
+  'Pass':         ('#B07A1E', '#F7EEDC'),
+  'Fail':         ('#A63A2E', '#F8E8E4')
+} %}
+{% set col = palette[result.predicted] %}
+
+<section class="verdict">
+  <div class="seal" style="--seal: {{ col[0] }}">
+    <div>
+      <b>{{ result.predicted }}</b>
+      <span>{{ result.confidence }}% confidence</span>
+    </div>
+  </div>
+  <div class="note">
+    <span class="tag" style="--seal: {{ col[0] }}; --tagbg: {{ col[1] }}">
+      {{ 'Academically at risk' if result.at_risk else 'On track' }}
+    </span>
+    <h1 style="font-size:clamp(1.5rem,3vw,2.1rem)">Predicted class of award</h1>
+    <p class="muted">{{ meta.cgpa_bands[result.predicted] }} on the NBTE 4.0 scale</p>
+    <p>{{ result.note }}</p>
+  </div>
+</section>
+
+<div class="panel">
+  <h2>How the ensemble voted</h2>
+  <p class="muted">Soft-vote probabilities averaged across Random Forest and Gradient Boosting.</p>
+  <div class="bars">
+    {% for cls, pct in result.probabilities.items() %}
+    <div class="bar-row {{ 'win' if cls == result.predicted }}">
+      <span>{{ cls }}</span>
+      <div class="track"><div class="fill" data-w="{{ pct }}"></div></div>
+      <span class="pct">{{ pct }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Suggested intervention</h2>
+  <ul class="recs">
+    {% for r in result.recommendations %}<li>{{ r }}</li>{% endfor %}
+  </ul>
+</div>
+
+<div class="panel">
+  <h2>Profile assessed</h2>
+  <div class="profile-echo">
+    {% for name, f in numeric.items() %}
+      <div><span>{{ f[0] }}</span><b>{{ record[name] | int }}</b></div>
+    {% endfor %}
+    {% for name, f in selects.items() %}
+      <div><span>{{ f[0] }}</span><b>{{ record[name] }}</b></div>
+    {% endfor %}
+  </div>
+</div>
+
+<p class="again"><a href="/">← Predict another student</a></p>
+{% endblock %}
+{% block scripts %}
+<script>
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.querySelectorAll('.fill').forEach(el => el.style.width = el.dataset.w + '%');
+  }));
+</script>
+{% endblock %}

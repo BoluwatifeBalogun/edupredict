@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Model dashboard · YCT{% endblock %}
+{% block content %}
+<h1>Model evaluation dashboard</h1>
+<p class="muted">{{ meta.algorithm }} · trained on {{ '{:,}'.format(meta.dataset_records) }} records,
+balanced to {{ '{:,}'.format(meta.train_records_after_smote) }} with SMOTE · 80/20 stratified split.</p>
+
+<div class="kpis">
+  <div class="kpi"><b>{{ '%.1f' % (meta.metrics.accuracy * 100) }}%</b><span>Accuracy</span></div>
+  <div class="kpi"><b>{{ '%.1f' % (meta.metrics.precision * 100) }}%</b><span>Precision (weighted)</span></div>
+  <div class="kpi"><b>{{ '%.1f' % (meta.metrics.recall * 100) }}%</b><span>Recall (weighted)</span></div>
+  <div class="kpi"><b>{{ '%.1f' % (meta.metrics.f1 * 100) }}%</b><span>F1-score (weighted)</span></div>
+  <div class="kpi"><b>{{ meta.train_seconds }}s</b><span>Training time</span></div>
+</div>
+
+<div class="dash-grid">
+  <div class="panel">
+    <h2>Per-class F1</h2>
+    <div class="canvas-wrap"><canvas id="f1Chart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>Class distribution in dataset</h2>
+    <div class="canvas-wrap"><canvas id="distChart"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>Confusion matrix</h2>
+    <p class="muted">Rows: actual · Columns: predicted</p>
+    <table class="cm">
+      <tr><th></th>{% for c in meta.classes %}<th>{{ c }}</th>{% endfor %}</tr>
+      {% for row in meta.confusion_matrix %}
+      {% set rmax = row | max %}
+      <tr>
+        <th class="rowh">{{ meta.classes[loop.index0] }}</th>
+        {% for v in row %}
+        <td style="background: rgba(30,77,56,{{ '%.2f' % (0.55 * v / (rmax if rmax else 1)) }});
+                   {{ 'color:#fff' if rmax and (v / rmax) > 0.55 }}">{{ v }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+  <div class="panel">
+    <h2>Top predictive factors</h2>
+    <p class="muted">Feature importance from the fitted Random Forest member.</p>
+    <div class="canvas-wrap"><canvas id="impChart"></canvas></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+const META = {{ meta | tojson }};
+const GREEN = '#1E4D38', MOSS = '#5F8570', GOLD = '#C9A227', LINE = '#DBD9CC', INK = '#4A5A50';
+Chart.defaults.font.family = 'Archivo, sans-serif';
+Chart.defaults.color = INK;
+
+new Chart(document.getElementById('f1Chart'), {
+  type: 'bar',
+  data: {
+    labels: META.classes,
+    datasets: [{ data: META.classes.map(c => META.per_class[c]['f1-score']),
+                 backgroundColor: [GOLD, GREEN, MOSS, '#B07A1E', '#A63A2E'], borderRadius: 5 }]
+  },
+  options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+    scales: { y: { min: 0, max: 1, grid: { color: LINE } }, x: { grid: { display: false } } } }
+});
+
+new Chart(document.getElementById('distChart'), {
+  type: 'doughnut',
+  data: {
+    labels: META.classes,
+    datasets: [{ data: META.classes.map(c => META.class_distribution[c]),
+                 backgroundColor: [GOLD, GREEN, MOSS, '#B07A1E', '#A63A2E'], borderWidth: 2, borderColor: '#fff' }]
+  },
+  options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } }, cutout: '58%' }
+});
+
+new Chart(document.getElementById('impChart'), {
+  type: 'bar',
+  data: {
+    labels: META.feature_importances.map(f => f.feature.replaceAll('_', ' ')),
+    datasets: [{ data: META.feature_importances.map(f => f.importance),
+                 backgroundColor: GREEN, borderRadius: 4 }]
+  },
+  options: { indexAxis: 'y', maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { grid: { color: LINE } }, y: { grid: { display: false } } } }
+});
+</script>
+{% endblock %}

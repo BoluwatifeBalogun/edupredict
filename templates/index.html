@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="lede">
+  <h1>Know the trajectory before the first exam is written.</h1>
+  <p>Enter a student's background, habits and environment. An ensemble of Random Forest and Gradient Boosting classifiers estimates the likely class of award, so intervention can happen while it still matters.</p>
+  <div class="stat-line">
+    <span><b>{{ '%.1f' % (meta.metrics.accuracy * 100) }}%</b>test accuracy</span>
+    <span><b>{{ '{:,}'.format(meta.dataset_records) }}</b>student records</span>
+    <span><b>{{ '{:,}'.format(meta.train_records_after_smote) }}</b>training corpus after SMOTE</span>
+    <span><b>5</b>award classes</span>
+  </div>
+</section>
+
+{% if errors %}
+<div class="errors" role="alert">
+  <strong>Fix the following before predicting:</strong>
+  <ul>{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+</div>
+{% endif %}
+
+<form class="predict" method="post" action="/predict">
+  {% macro num(name) %}
+    {% set f = numeric[name] %}
+    <label class="f">{{ f[0] }}
+      <input type="number" name="{{ name }}" min="{{ f[1] }}" max="{{ f[2] }}" step="{{ f[3] }}"
+             value="{{ form.get(name, '') }}" required>
+      <small>{{ f[4] }}</small>
+    </label>
+  {% endmacro %}
+  {% macro sel(name) %}
+    {% set f = selects[name] %}
+    <label class="f">{{ f[0] }}
+      <select name="{{ name }}" required>
+        <option value="" {% if not form.get(name) %}selected{% endif %} disabled>Select…</option>
+        {% for opt in f[1] %}
+          <option value="{{ opt }}" {% if form.get(name) == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  {% endmacro %}
+
+  <fieldset>
+    <legend>Academic record</legend>
+    <div class="grid">
+      {{ num('Previous_CGPA') }}{{ num('Days_Present') }}{{ num('Hours_Studied') }}{{ num('Tutoring_Sessions') }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Habits & wellbeing</legend>
+    <div class="grid">
+      {{ num('Sleep_Hours') }}{{ sel('Extracurricular_Activities') }}{{ sel('Motivation_Level') }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Learning environment</legend>
+    <div class="grid">
+      {{ sel('Access_to_Resources') }}{{ sel('Internet_Access') }}{{ sel('Teacher_Quality') }}{{ sel('School_Type') }}{{ sel('Peer_Influence') }}{{ sel('Distance_from_Home') }}
+    </div>
+  </fieldset>
+  <fieldset>
+    <legend>Background</legend>
+    <div class="grid">
+      {{ sel('Parental_Involvement') }}{{ sel('Parental_Education_Level') }}{{ sel('Learning_Disabilities') }}{{ sel('Gender') }}
+    </div>
+  </fieldset>
+  <div class="form-foot">
+    <small>CGPA and class-day inputs are converted to the model feature space (NBTE band mapping); omitted attributes are imputed to dataset baselines.</small>
+    <button class="cta" type="submit">Predict performance</button>
+  </div>
+</form>
+{% endblock %}
